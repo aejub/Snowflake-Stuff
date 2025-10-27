@@ -1,0 +1,690 @@
+FLOW: Salesforce data from Sales Cloud to AWS Snowflake
+
+
+
+By Anastasia Vogelaar
+
+4 min
+
+
+Salesforce data is extracted daily into files and dropped to an S3 bucket. From there, data is loaded into AWS Snowflake instance. The final tables are split into two schemas in Salesforce schema - one that contains the most current snapshot of the respective Salesforce object and one that contains historical representation of each record. Only the tables used for reporting will have historical tables built. Tables, not required for historical data will be having only staging tables.
+
+image-20250903-183856.png
+ 
+
+Internal SME
+Assets
+DMS Projects
+Control M (active  08/30/2024)
+Connections
+Salesforce Sales Cloud
+Cloud Storage
+Snowflake
+Objects
+Developer Considerations
+Internal SME
+Data transformation from Salesforce Sales Cloud to files in S3
+
+Data transformation from files in S3 to AWS Snowflake
+
+Salesforce expects
+
+Active Batch specialists
+
+@Nathan Dunahoo 
+
+@Suzanne Buffington @Vijay Bhagat 
+
+@Rehgan Shively , @Tab Huser 
+
+@Josh Jones , @Shawn Lyons 
+
+Assets
+DMS Projects
+Salesforce - to - S3 (@Nathan Dunahoo )
+
+S3 - to - Snowflake (@Suzanne Buffington )
+
+Control M (active  08/30/2024)
+File creation Control M schedule: Daily at Midnight 12am:  Group 1 (daily),Group 2 - adhoc
+
+Triggered after above: salesforce_all
+
+Dev Control M
+
+Prod ControlM
+
+Connections
+Salesforce Sales Cloud
+Dev: Name - Salesforce; Service URL - https://test.salesforce.com/services/Soap/u/52.0; User name - integration@american-equity.com.uat
+
+UAT: Name - Salesforce; Service URL -  https://test.salesforce.com/services/Soap/u/52.0; User  name - integration@american-equity.com.uat
+
+PROD: Name - Salesforce; Service URL - https://login.salesforce.com/services/Soap/u/41.0; User name - integration@american-equity.com
+
+Cloud Storage
+Source data: s3-aebckt-dms-landing-[dev/uat/prod]/Salesforce
+
+Archive bucket: s3-aebckt-dms-archive-[dev/uat/prod]/Salesforce
+
+Snowflake
+https://app.snowflake.com/amequity/aws_centraloh_us
+
+Databases: DEV/UAT/PROD
+
+DATABASE SCHEMA
+
+OBJECT NAMING CONVENTION
+
+EXAMPLE
+
+STAGING
+
+SALESFORCE_[SalesForce Object Name]_ST
+
+SALESFORCE_POLICY__C_ST
+
+SALESFORCE
+
+[Salesforce Object Name] (for current snapshot, and [Salesforce Object Name]_ALL for the historical tables
+
+POLICY__C and POLICY__C_ALL
+
+Objects
+OBJECT (counts as of 2023-07-24)
+
+CURRENT
+
+HISTORICAL
+
+LOADER
+
+NOTES
+
+1	
+ACCOUNT (656 rows)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+2	
+CAMPAIGN  (~2.8K ) 
+
+YES
+
+YES
+
+Daily
+
+ 
+
+3	
+CAMPAIGNMEMEBER (~2M)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+4	
+CONTACT (~535.5K)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+5	
+ET4AE5__INDIVIDUALEMAILRESULT__C
+
+YES
+
+NO
+
+Daily
+
+Added to daily Aug 2025
+
+6	
+GEOPOINTE__GP_ASSIGNMENT_AREA__C (56 rows)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+7	
+GEOPOINTE__GP_ASSIGNMENT_PLAN__C (4 rows)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+8	
+GEOPOINTE__SHAPE__C ( 781 rows)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+9	
+HIERARCHY__C (~342.5K)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+10	
+INITIAL_ALLOCATION__C (~312.5K)
+
+YES
+
+YES
+
+Daily
+
+No longer updated since Sept 2024
+
+11	
+INIT_ALLOC__C (~486K)
+
+YES
+
+YES
+
+Daily
+
+No longer updated since Sept 2024
+
+12	
+POLICY__C (~288K)
+
+YES
+
+YES
+
+Daily
+
+No longer updated since Sept 2024
+
+13	
+LISTEMAIL (New 2/2025)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+14	
+MARKET_METRICS_LOCATION_DATA__C (1,2MM 2024-02-23)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+15	
+OPPORTUNITY (102k 2024-02-23)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+16	
+PRODUCT__C (74 rows)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+17	
+RECORDTYPE (63 rows 2024-02-23)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+18	
+RIDER__C (276 rows 2024-02-23)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+19	
+TASK (~2.7M)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+20	
+USER (553 rows)
+
+YES
+
+YES
+
+Daily
+
+ 
+
+21	
+VOICECALL (~39k)
+
+YES
+
+YES
+
+Daily
+
+New 2025-09-03
+
+22	
+ACCOUNT_ACCOUNT_RELATIONSHIP__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+23	
+ADDRESS__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+24	
+ADVISOR_WHOLESALER__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+25	
+ALERT__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+26	
+APPROVED_PRODUCT__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+27	
+BROKER_DEALER_RELATIONSHIP__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+28	
+EMAIL_ADDRESS__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+29	
+EVENT
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+30	
+EXCEPTION__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+31	
+GEOPOINTE__GEO_LOCATION__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+32	
+GEOPOINTE__GEOCODE__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+33	
+GEOPOINTE__GP_DEMOGRAPHICS__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+34	
+GOLD_EAGLE__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+35	
+INTEGRATION__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+36	
+KEY_RELATIONSHIPS__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+37	
+LICENSE__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+38	
+LOYALTY_PROGRAM__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+39	
+MONTHLY_PREMIUMS__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+40	
+POLICY_HOLDER__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+41	
+PRODUCT_TRAINING__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+42	
+QUALTRICS__SURVEY_RESPONSE__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+43	
+STATE_TRAINING__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+44	
+TERRITORY_HISTORY__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+45	
+TOP_ADVISOR_SNAPSHOT__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+46	
+WALLET_SHARE__C
+
+YES
+
+NO
+
+Adhoc
+
+ 
+
+Developer Considerations
+Schema definitions for each object could be retrieved from the respective objects in Azure Snowflake instance (SALESFORCE_SC schema). 
+
+Note: the target table may not have all the columns that are available in Salesforce and/or the source files. That is to be expected. Only use the columns that are identified in the respective Azure Snowflake objects.
+
+Jira Cards: 
+
+SE-1284: Load Voice Calls object from Salesforce into Snowflake
+Done
+ 
+
+DT-16609: Stale Data in Snowflake for Prod.Salesforce.ET4AE5__INDIVIDUALEMAILRESULT__C
+Done
+ 
+
+DT-15846: Snowflake prod.salesforce.user table stale since August 29, 2024
+Done
+ 
+
+DT-15134: Split Saleforce-to-S3 Process by Object
+Done
+ 
+
+DT-15131: Add Salesforce Fields to Snowflake
+Done
+ 
+
+DMF-828: Convert from IICS: Salesforce data to S3 Bucket
+Done
+ 
+
+DMF-1744: Configure a sync between Salesforce objects and Snowflake (AWS)
+Done
+ 
+
+DMF-1738: Move Salesforce data from S3 Bucket to Snowflake AWS
+Done
+ , 
+
+DMF-1734: Move Salesforce data from S3 Bucket to Snowflake AWS -- Monthly 26 tables (Truncate-Load into STAGING schema)
+Done
+ 
+
+DT-12591: Application Integration: Bring CRD__c field from SalesForce into the Contact object - AWS
+Done
+ 
+
+DMF-1737: Move Salesforce in Snowflake AWS from Staging to SALESFORCE schema -- Monthly 26 tables
+Done
+
+DT-16028: DATA: PSM New Fields on Salesforce.Contact
+Done
+ 
+
+AWS STTM: AWS Snowflake - Salesforce Sales Cloud Inbound.xlsx
+
+Staging tables are to be truncated and reloaded with each run (if the file is available).
+
+LOAD_TS should be populated with the runtime timestamp in UTC format.
+
+SALESFORCE schema objects should only contain the most current version of each object. Use MERGE to insert+update+delete the records from Staging to Salesforce current table (include MODIFIED_TS timestamp for records that are being overwritten), truncate and insert is also acceptable (choose better performance)
+
+[Object Name]_ALL tables should contain all historical versions of each record. Almost all records in Salesforce get overwritten daily, even if nothing is changed. Hence, when identifying changed rows, check other fields but LastModifiedDate . In the past, we have been using an MD5 hash of the concatenated string of all the fields.
+
+Each source file contains the full set of data of the respective object in Salesforce.
+
+All Salesforce objects have a primary key field, which is ID 
+
+All Salesforce objects have LastModifiedDate system field that could be used to identify the latest version of the record.
+
+Tables which not required to maintain historical records, those will be having only staging table and current table (will not be having history table). Example: ACCOUNT_ACCOUNT_RELATIONSHIP__C table will be as STAGING.SALESFORCE_ACCOUNT_ACCOUNT_RELATIONSHIP__C_ST and SALSEFORCE.SALESFORCE_ACCOUNT_ACCOUNT_RELATIONSHIP__C
+
+Tables which not required to maintain historical records, those staging and current tables will only be Truncate-Load basis
+
+Staging will be as it is same as source and current table will be having LOAD_TS as additional audit column
+
+Azure STTM Document: DataLake Migration - Salesforce SalesCloud Objects.xlsx
+
+Azure Pre-raw mapping instructions: SNOWFLAKE: Recurring loads from Salesforce to Pre-Raw
+
+Salesforce only allows 15,000 transactions within a 24-hour period, max batch size is 10,000. If NOTE is not loaded (~37MM records), all other tables that we load (as of Aug 26, 2022) contain about 60MM rows. The loaders of the secondary objects (Column SALESFORCE_ALL = NO) may have to be rescheduled to run once a month.
